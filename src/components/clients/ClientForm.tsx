@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Textarea } from '@/components/ui/Textarea'
 import { Button } from '@/components/ui/Button'
-import { CLIENT_STATUSES, PRIORITIES, CATEGORIES } from '@/lib/constants'
-import { useProfiles } from '@/hooks/useProfiles'
+import { CLIENT_STATUSES, PRIORITIES } from '@/lib/constants'
 import type { Client, ClientFormData } from '@/lib/types'
+
+const ENGAGEMENT_MANAGERS = ['Nick King', 'Brady Weller']
+const ENTREPRENEURS = ['Finley Underwood', 'Brady Weller', 'Lauren Prieur', 'Nick King', 'Patrick Sanders', 'Drew Elliot']
+const COMPLIANCE = ['Lauren Prieur']
+
+const INPUT = 'w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-brand-500'
+const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
 
 interface ClientFormProps {
   initial?: Partial<Client>
@@ -16,10 +20,14 @@ interface ClientFormProps {
 }
 
 export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
-  const { profiles } = useProfiles()
+  const parsedContact = (() => {
+    try { return initial?.contact_info ? JSON.parse(initial.contact_info) : {} } catch { return {} }
+  })()
+
   const [form, setForm] = useState<ClientFormData>({
     name: initial?.name ?? '',
     company: initial?.company ?? '',
+    current_company: initial?.current_company ?? '',
     summary: initial?.summary ?? '',
     status: initial?.status ?? 'active research',
     priority: initial?.priority ?? 'medium',
@@ -30,29 +38,44 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
     blocker: initial?.blocker ?? '',
     category: initial?.category ?? '',
     notes: initial?.notes ?? '',
-    current_company: initial?.current_company ?? null,
     rollover_amount: initial?.rollover_amount ?? null,
-    linkedin_url: initial?.linkedin_url ?? null,
+    linkedin_url: initial?.linkedin_url ?? '',
     linkedin_activity: initial?.linkedin_activity ?? null,
-    birthday: initial?.birthday ?? null,
-    interests: initial?.interests ?? null,
-    engagement_manager: initial?.engagement_manager ?? null,
-    compliance_manager: initial?.compliance_manager ?? null,
-    entrepreneur: initial?.entrepreneur ?? null,
+    birthday: initial?.birthday ?? '',
+    interests: initial?.interests ?? '',
+    engagement_manager: initial?.engagement_manager ?? '',
+    compliance_manager: initial?.compliance_manager ?? '',
+    entrepreneur: initial?.entrepreneur ?? '',
+    contact_info: initial?.contact_info ?? null,
   })
+
+  const [contact, setContact] = useState({
+    email: parsedContact.email ?? '',
+    phone: parsedContact.phone ?? '',
+    address1: parsedContact.address1 ?? '',
+    address2: parsedContact.address2 ?? '',
+    city: parsedContact.city ?? '',
+    state: parsedContact.state ?? '',
+    zip: parsedContact.zip ?? '',
+  })
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const set = (key: keyof ClientFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
 
+  const setC = (key: keyof typeof contact) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setContact((c) => ({ ...c, [key]: e.target.value }))
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name.trim()) { setError('Client name is required'); return }
+    if (!form.name.trim()) { setError('Contact name is required'); return }
     try {
       setLoading(true)
       setError(null)
-      await onSubmit(form)
+      const contactJson = Object.values(contact).some(Boolean) ? JSON.stringify(contact) : null
+      await onSubmit({ ...form, contact_info: contactJson })
     } catch (err) {
       setError(err instanceof Error ? err.message : JSON.stringify(err))
     } finally {
@@ -61,80 +84,138 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-          {error}
-        </div>
+        <div className="text-sm text-red-400 bg-red-900/30 border border-red-800 rounded-md px-3 py-2">{error}</div>
       )}
 
+      {/* Name + NewCo */}
       <div className="grid grid-cols-2 gap-4">
-        <Input label="Contact name *" value={form.name} onChange={set('name')} placeholder="Alex Chen" />
-        <Input label="Company / Project" value={form.company ?? ''} onChange={set('company')} placeholder="Deducto" />
+        <div>
+          <label className={LABEL}>Contact name *</label>
+          <input value={form.name} onChange={set('name')} placeholder="Dan Wertman" className={INPUT} />
+        </div>
+        <div>
+          <label className={LABEL}>NewCo / Project</label>
+          <input value={form.company ?? ''} onChange={set('company')} placeholder="Deducto" className={INPUT} />
+        </div>
       </div>
 
-      <Textarea
-        label="Business summary"
-        value={form.summary ?? ''}
-        onChange={set('summary')}
-        rows={2}
-        placeholder="One or two sentences on what they're building and where they are."
-      />
-
+      {/* Current Co + LinkedIn */}
       <div className="grid grid-cols-2 gap-4">
-        <Select
-          label="Status"
-          value={form.status}
-          onChange={set('status')}
-          options={CLIENT_STATUSES.map((s) => ({ value: s, label: s }))}
-        />
-        <Select
-          label="Priority"
-          value={form.priority}
-          onChange={set('priority')}
-          options={PRIORITIES.map((p) => ({ value: p, label: p }))}
-        />
+        <div>
+          <label className={LABEL}>Current company</label>
+          <input value={form.current_company ?? ''} onChange={set('current_company')} placeholder="Mode Mobile" className={INPUT} />
+        </div>
+        <div>
+          <label className={LABEL}>LinkedIn URL</label>
+          <input value={form.linkedin_url ?? ''} onChange={set('linkedin_url')} placeholder="linkedin.com/in/..." className={INPUT} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Select
-          label="Category"
-          value={form.category ?? ''}
-          onChange={set('category')}
-          placeholder="Select category"
-          options={CATEGORIES.map((c) => ({ value: c, label: c }))}
-        />
-        <Select
-          label="Assign to"
-          value={form.assigned_to ?? ''}
-          onChange={set('assigned_to')}
-          placeholder="Unassigned"
-          options={profiles.map((p) => ({
-            value: p.id,
-            label: p.full_name || p.email.split('@')[0],
-          }))}
-        />
+      {/* Business summary */}
+      <div>
+        <label className={LABEL}>Business summary</label>
+        <textarea value={form.summary ?? ''} onChange={set('summary')} rows={2}
+          placeholder="One or two sentences on what they're building and where they are."
+          className={INPUT + ' resize-none'} />
       </div>
 
+      {/* Status + Priority */}
       <div className="grid grid-cols-2 gap-4">
-        <Input label="Next call date" type="date" value={form.next_call_date ?? ''} onChange={set('next_call_date')} />
-        <Input label="Last touch date" type="date" value={form.last_touch_date ?? ''} onChange={set('last_touch_date')} />
+        <Select label="Status" value={form.status} onChange={set('status')}
+          options={CLIENT_STATUSES.map((s) => ({ value: s, label: s }))} />
+        <Select label="Priority" value={form.priority} onChange={set('priority')}
+          options={PRIORITIES.map((p) => ({ value: p, label: p }))} />
       </div>
 
-      <Input
-        label="Blocker"
-        value={form.blocker ?? ''}
-        onChange={set('blocker')}
-        placeholder="What's in the way? Leave empty if none."
-      />
+      {/* Team roles */}
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className={LABEL}>Engagement Manager</label>
+          <select value={form.engagement_manager ?? ''} onChange={set('engagement_manager')} className={INPUT}>
+            <option value="">—</option>
+            {ENGAGEMENT_MANAGERS.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={LABEL}>Compliance Manager</label>
+          <select value={form.compliance_manager ?? ''} onChange={set('compliance_manager')} className={INPUT}>
+            <option value="">—</option>
+            {COMPLIANCE.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={LABEL}>Entrepreneur</label>
+          <select value={form.entrepreneur ?? ''} onChange={set('entrepreneur')} className={INPUT}>
+            <option value="">—</option>
+            {ENTREPRENEURS.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+      </div>
 
-      <Textarea
-        label="Notes"
-        value={form.notes ?? ''}
-        onChange={set('notes')}
-        rows={3}
-        placeholder="Context, decisions, background, links..."
-      />
+      {/* Contact info */}
+      <div>
+        <label className={LABEL}>Contact information</label>
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <input value={contact.email} onChange={setC('email')} placeholder="Email" className={INPUT} />
+            <input value={contact.phone} onChange={setC('phone')} placeholder="Phone" className={INPUT} />
+          </div>
+          <input value={contact.address1} onChange={setC('address1')} placeholder="Address Line 1" className={INPUT} />
+          <input value={contact.address2} onChange={setC('address2')} placeholder="Address Line 2 (optional)" className={INPUT} />
+          <div className="grid grid-cols-3 gap-2">
+            <input value={contact.city} onChange={setC('city')} placeholder="City" className={INPUT} />
+            <input value={contact.state} onChange={setC('state')} placeholder="State" className={INPUT} />
+            <input value={contact.zip} onChange={setC('zip')} placeholder="Zip" className={INPUT} />
+          </div>
+        </div>
+      </div>
+
+      {/* Notes + Interests */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={LABEL}>Notes</label>
+          <textarea value={form.notes ?? ''} onChange={set('notes')} rows={3}
+            placeholder="Context, decisions, background..." className={INPUT + ' resize-none'} />
+        </div>
+        <div>
+          <label className={LABEL}>Interests</label>
+          <textarea value={form.interests ?? ''} onChange={set('interests')} rows={3}
+            placeholder="Hobbies, passions, topics they care about..." className={INPUT + ' resize-none'} />
+        </div>
+      </div>
+
+      {/* Rollover + Birthday */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={LABEL}>Rollover amount</label>
+          <input type="number" value={form.rollover_amount ?? ''} onChange={(e) => setForm((f) => ({ ...f, rollover_amount: e.target.value ? Number(e.target.value) : null }))}
+            placeholder="0" className={INPUT} />
+        </div>
+        <div>
+          <label className={LABEL}>Birthday</label>
+          <input type="date" value={form.birthday ?? ''} onChange={set('birthday')} className={INPUT} />
+        </div>
+      </div>
+
+      {/* Next call + Last touch */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={LABEL}>Next call date</label>
+          <input type="date" value={form.next_call_date ?? ''} onChange={set('next_call_date')} className={INPUT} />
+        </div>
+        <div>
+          <label className={LABEL}>Last touch date</label>
+          <input type="date" value={form.last_touch_date ?? ''} onChange={set('last_touch_date')} className={INPUT} />
+        </div>
+      </div>
+
+      {/* Blocker */}
+      <div>
+        <label className={LABEL}>Blocker</label>
+        <input value={form.blocker ?? ''} onChange={set('blocker')} placeholder="What's in the way? Leave empty if none." className={INPUT} />
+      </div>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>

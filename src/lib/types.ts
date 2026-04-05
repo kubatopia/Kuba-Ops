@@ -56,6 +56,7 @@ export interface Client {
   engagement_manager: string | null
   compliance_manager: string | null
   entrepreneur: string | null
+  contact_info: string | null
   created_at: string
   updated_at: string
   // populated when fetching client detail

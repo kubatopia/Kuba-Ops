@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Plus, Check, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMetrics, type Metric } from '@/hooks/useMetrics'
@@ -39,51 +39,6 @@ const emptyRow = (): EditRow => ({
   new_mrr: null, arr: null,
 })
 
-function PasswordGate({ children }: { children: React.ReactNode }) {
-  const [unlocked, setUnlocked] = useState(false)
-  const [input, setInput] = useState('')
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    if (sessionStorage.getItem('metrics_unlocked') === '1') setUnlocked(true)
-  }, [])
-
-  if (unlocked) return <>{children}</>
-
-  const attempt = () => {
-    if (input === 'utopia') {
-      sessionStorage.setItem('metrics_unlocked', '1')
-      setUnlocked(true)
-    } else {
-      setError(true)
-      setInput('')
-    }
-  }
-
-  return (
-    <div className="flex items-center justify-center h-full min-h-[60vh]">
-      <div className="w-80 p-8 rounded-xl border border-gray-700 bg-gray-800/60 flex flex-col items-center gap-4">
-        <div className="text-sm font-semibold text-gray-300 tracking-wide uppercase">Metrics — Restricted</div>
-        <input
-          type="password"
-          value={input}
-          onChange={(e) => { setInput(e.target.value); setError(false) }}
-          onKeyDown={(e) => e.key === 'Enter' && attempt()}
-          placeholder="Enter password"
-          autoFocus
-          className="w-full text-sm bg-gray-900 border border-gray-600 rounded-md px-3 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-        />
-        {error && <p className="text-xs text-rose-400">Incorrect password</p>}
-        <button
-          onClick={attempt}
-          className="w-full py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium transition-colors"
-        >
-          Unlock
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function MetricsPage() {
   const { metrics, loading, refetch } = useMetrics()
@@ -129,7 +84,6 @@ export default function MetricsPage() {
   if (loading) return <LoadingSpinner />
 
   return (
-    <PasswordGate>
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -223,6 +177,5 @@ export default function MetricsPage() {
         </table>
       </div>
     </div>
-    </PasswordGate>
   )
 }

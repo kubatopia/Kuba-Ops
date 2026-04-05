@@ -27,14 +27,13 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const res = await fetch('/api/auth/request-access', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email }),
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
     })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error ?? 'Something went wrong.')
+    if (error) {
+      setError(error.message)
     } else {
       setSuccess(true)
     }
@@ -56,12 +55,12 @@ export default function LoginPage() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-8">
           <h1 className="text-base font-semibold text-gray-900 mb-6">
-            {mode === 'signin' ? 'Sign in' : 'Request access'}
+            {mode === 'signin' ? 'Sign in' : 'Create account'}
           </h1>
 
           {success ? (
             <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-3">
-              Request sent! You'll receive an email once your access is approved.
+              Account created! Check your email to confirm, then sign in.
             </div>
           ) : (
             <form onSubmit={mode === 'signin' ? handleSignIn : handleRequest} className="space-y-4">
@@ -100,7 +99,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              {mode === 'signin' && (
+              {(mode === 'signin' || mode === 'request') && (
                 <div className="flex flex-col gap-1">
                   <label htmlFor="password" className="text-xs font-medium text-gray-700">Password</label>
                   <input
@@ -126,7 +125,7 @@ export default function LoginPage() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
                 )}
-                {loading ? (mode === 'signin' ? 'Signing in…' : 'Sending…') : (mode === 'signin' ? 'Sign in' : 'Request access')}
+                {loading ? (mode === 'signin' ? 'Signing in…' : 'Creating account…') : (mode === 'signin' ? 'Sign in' : 'Create account')}
               </button>
             </form>
           )}
@@ -134,9 +133,9 @@ export default function LoginPage() {
 
         <p className="text-center text-xs text-gray-400 mt-4">
           {mode === 'signin' ? (
-            <>Don't have access?{' '}
+            <>Don't have an account?{' '}
               <button onClick={() => switchMode('request')} className="text-gray-600 underline hover:text-gray-900">
-                Request access
+                Create one
               </button>
             </>
           ) : (

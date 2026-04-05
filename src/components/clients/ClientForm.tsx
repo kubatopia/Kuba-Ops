@@ -1,9 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
-import { CLIENT_STATUSES, PRIORITIES } from '@/lib/constants'
 import type { Client, ClientFormData } from '@/lib/types'
 
 const ENGAGEMENT_MANAGERS = ['Nick King', 'Brady Weller']
@@ -121,14 +119,6 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
           className={INPUT + ' resize-none'} />
       </div>
 
-      {/* Status + Priority */}
-      <div className="grid grid-cols-2 gap-4">
-        <Select label="Status" value={form.status} onChange={set('status')}
-          options={CLIENT_STATUSES.map((s) => ({ value: s, label: s }))} />
-        <Select label="Priority" value={form.priority} onChange={set('priority')}
-          options={PRIORITIES.map((p) => ({ value: p, label: p }))} />
-      </div>
-
       {/* Team roles */}
       <div className="grid grid-cols-3 gap-4">
         <div>
@@ -197,24 +187,6 @@ export function ClientForm({ initial, onSubmit, onCancel }: ClientFormProps) {
           <label className={LABEL}>Birthday</label>
           <input type="date" value={form.birthday ?? ''} onChange={set('birthday')} className={INPUT} />
         </div>
-      </div>
-
-      {/* Next call + Last touch */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={LABEL}>Next call date</label>
-          <input type="date" value={form.next_call_date ?? ''} onChange={set('next_call_date')} className={INPUT} />
-        </div>
-        <div>
-          <label className={LABEL}>Last touch date</label>
-          <input type="date" value={form.last_touch_date ?? ''} onChange={set('last_touch_date')} className={INPUT} />
-        </div>
-      </div>
-
-      {/* Blocker */}
-      <div>
-        <label className={LABEL}>Blocker</label>
-        <input value={form.blocker ?? ''} onChange={set('blocker')} placeholder="What's in the way? Leave empty if none." className={INPUT} />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

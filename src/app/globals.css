@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* ── Forced dark mode ── */
+.dark body                          { background-color: #0f172a; color: #f1f5f9; }
+
+/* Backgrounds */
+.dark .bg-white                     { background-color: #1e293b !important; }
+.dark .bg-gray-50                   { background-color: #0f172a !important; }
+.dark .bg-gray-100                  { background-color: #1e293b !important; }
+.dark .bg-gray-200                  { background-color: #334155 !important; }
+.dark .bg-brand-50\/40             { background-color: rgba(49,46,129,0.25) !important; }
+
+/* Borders */
+.dark .border-gray-100              { border-color: #334155 !important; }
+.dark .border-gray-200              { border-color: #475569 !important; }
+.dark .border-gray-300              { border-color: #64748b !important; }
+.dark .divide-gray-50 > * + *       { border-color: #334155 !important; }
+.dark .divide-gray-100 > * + *      { border-color: #334155 !important; }
+.dark .divide-x > * + *             { border-color: #334155 !important; }
+.dark .border-dashed                { border-color: #334155 !important; }
+
+/* Text */
+.dark .text-gray-900                { color: #f8fafc !important; }
+.dark .text-gray-800                { color: #f1f5f9 !important; }
+.dark .text-gray-700                { color: #e2e8f0 !important; }
+.dark .text-gray-600                { color: #cbd5e1 !important; }
+.dark .text-gray-500                { color: #94a3b8 !important; }
+.dark .text-gray-400                { color: #94a3b8 !important; }
+
+/* Inputs & selects */
+.dark input:not([type='checkbox']),
+.dark select,
+.dark textarea                      { background-color: #0f172a !important; color: #f1f5f9 !important; border-color: #475569 !important; }
+.dark input::placeholder            { color: #64748b !important; }
+
+/* Sidebar */
+.dark aside                         { background-color: #1e293b !important; border-color: #334155 !important; }
+.dark nav a.bg-gray-100             { background-color: #334155 !important; }
+.dark nav a:hover                   { background-color: #334155 !important; }
+
+/* Top bar */
+.dark header.border-b               { background-color: #1e293b !important; border-color: #334155 !important; }
+
+/* Hover rows */
+.dark .hover\:bg-gray-50\/60:hover  { background-color: rgba(30,41,59,0.6) !important; }
+.dark .hover\:bg-gray-50:hover      { background-color: #1e293b !important; }
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar-thumb     { background: #334155; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Subtle focus ring that doesn't look like a browser default */
+:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 2px;
+}
+
+/* Smooth scrollbar on mac */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}

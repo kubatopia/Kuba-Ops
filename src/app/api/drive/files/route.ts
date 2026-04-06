@@ -43,6 +43,8 @@ async function driveSearch(query: string, token: string) {
     q: query,
     fields: 'files(id,name,mimeType,webViewLink,modifiedTime)',
     pageSize: '50',
+    includeItemsFromAllDrives: 'true',
+    supportsAllDrives: 'true',
   })
   const res = await fetch(
     `https://www.googleapis.com/drive/v3/files?${params}`,

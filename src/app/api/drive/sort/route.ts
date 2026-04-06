@@ -58,6 +58,8 @@ async function driveSearch(query: string, token: string): Promise<any[]> {
     q: query,
     fields: 'files(id,name,mimeType,webViewLink,parents,createdTime)',
     pageSize: '100',
+    includeItemsFromAllDrives: 'true',
+    supportsAllDrives: 'true',
   })
   const res = await fetch(
     `https://www.googleapis.com/drive/v3/files?${params}`,
@@ -78,7 +80,7 @@ async function getFileContent(fileId: string, mimeType: string, token: string): 
 
 async function moveFile(fileId: string, oldParentId: string, newParentId: string, token: string): Promise<boolean> {
   const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}?addParents=${newParentId}&removeParents=${oldParentId}&fields=id`,
+    `https://www.googleapis.com/drive/v3/files/${fileId}?addParents=${newParentId}&removeParents=${oldParentId}&fields=id&supportsAllDrives=true`,
     {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -95,7 +97,7 @@ async function findOrCreateFolder(name: string, parentId: string, token: string)
   )
   if (existing.length > 0) return existing[0].id
 
-  const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+  const res = await fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({

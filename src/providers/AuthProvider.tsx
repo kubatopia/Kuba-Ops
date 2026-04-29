@@ -12,10 +12,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+
+    Promise.race([supabase.auth.getSession(), timeout])
+      .then((result) => {
+        if (result && 'data' in result) {
+          setUser(result.data.session?.user ?? null)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
 
     const {
       data: { subscription },
